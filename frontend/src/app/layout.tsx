@@ -1,0 +1,32 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono, IBM_Plex_Sans } from "next/font/google";
+import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const ibmPlexSans = IBM_Plex_Sans({ subsets: ['latin'], variable: '--font-sans' });
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "SkillDiff",
+  description: "Bridge skill gaps in your resume.",
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html
+      lang="en"
+      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", ibmPlexSans.variable)}
+    >
+      <body className="min-h-full flex flex-col p-10">{children}</body>
+    </html>
+  );
+}
