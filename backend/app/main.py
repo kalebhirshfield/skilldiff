@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from app.utils.parser import extract_text_from_file
+from app.utils.prompt import generate_analysis
+import json
 
 app = FastAPI()
 
@@ -14,7 +16,12 @@ app.add_middleware(
 
 
 @app.post("/analyse")
-async def read_files(cv_file: UploadFile, description_file: UploadFile) -> str:
+async def read_files(cv_file: UploadFile, description_file: UploadFile):
     cv_text = await extract_text_from_file(cv_file)
     description_text = await extract_text_from_file(description_file)
-    return "Success"
+
+    projects = await generate_analysis(cv_text, description_text)
+    print("--- LLM JSON RESPONSE START ---")
+    print(json.dumps(projects, indent=4))
+    print("--- LLM JSON RESPONSE END ---")
+    return projects
