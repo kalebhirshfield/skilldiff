@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 export default function FileUpload(id: string, description: string) {
     return (
         <Field>
-            <FieldLabel htmlFor="CV">
+            <FieldLabel htmlFor={id}>
                 {id} <span className="text-destructive">*</span>
             </FieldLabel>
             <Input id={id} type="file" required />
