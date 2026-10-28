@@ -21,6 +21,8 @@ export default function Home() {
   const [text, setText] = useState("Submit")
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   async function sendData() {
     setText("Uploading files...")
     setAnalysisResult(null)
@@ -44,12 +46,12 @@ export default function Home() {
     formData.append("cv_file", cvFile)
     formData.append("description_file", descriptionFile)
 
-    const response = await fetch("http://localhost:8000/analyse", { method: "POST", body: formData })
+    const response = await fetch("${API_URL}/analyse", { method: "POST", body: formData })
     const { task_id } = await response.json()
     setText("Analysing...")
 
     const intervalId = setInterval(async () => {
-      const statusRes = await fetch(`http://localhost:8000/tasks/${task_id}`);
+      const statusRes = await fetch("${API_URL}/tasks/${task_id}");
       const statusData = await statusRes.json();
 
       if (statusData.status === "SUCCESS") {
