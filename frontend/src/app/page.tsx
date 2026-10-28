@@ -1,27 +1,31 @@
 "use client"
 
-import FileUpload from "@/components/file-upload";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import FileUpload from "@/components/file-upload"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { useState } from "react"
 
 interface ProjectRecommendation {
-  title: string;
-  description: string;
-  difficulty: string;
+  title: string
+  description: string
+  difficulty: string
 }
 
 interface AnalysisResponse {
-  missing_skills: string[];
-  project_recommendations: ProjectRecommendation[];
+  missing_skills: string[]
+  project_recommendations: ProjectRecommendation[]
 }
 
 export default function Home() {
   const [text, setText] = useState("Submit")
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null)
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || (
+    process.env.NODE_ENV === "production"
+      ? "https://skilldiff.onrender.com"
+      : "http://localhost:8000"
+  )
 
   async function sendData() {
     setText("Uploading files...")
@@ -30,8 +34,8 @@ export default function Home() {
     const descriptionInput = document.getElementById("Description")
 
     if (!(cvInput instanceof HTMLInputElement) || !cvInput.files?.[0]) {
-      setText("Select a CV");
-      return;
+      setText("Select a CV")
+      return
     }
 
     if (!(descriptionInput instanceof HTMLInputElement) || !descriptionInput.files?.[0]) {
@@ -39,7 +43,7 @@ export default function Home() {
       return
     }
 
-    const cvFile = cvInput.files[0];
+    const cvFile = cvInput.files[0]
     const descriptionFile = descriptionInput.files[0]
 
     const formData = new FormData()
@@ -51,19 +55,19 @@ export default function Home() {
     setText("Analysing...")
 
     const intervalId = setInterval(async () => {
-      const statusRes = await fetch("${API_URL}/tasks/${task_id}");
-      const statusData = await statusRes.json();
+      const statusRes = await fetch("${API_URL}/tasks/${task_id}")
+      const statusData = await statusRes.json()
 
       if (statusData.status === "SUCCESS") {
-        clearInterval(intervalId);
-        setAnalysisResult(statusData.result);
-        setText("Analysis Complete");
+        clearInterval(intervalId)
+        setAnalysisResult(statusData.result)
+        setText("Analysis Complete")
       } else if (statusData.status === "FAILURE") {
-        clearInterval(intervalId);
-        setText("Analysis Failed");
-        console.error("Celery task error:", statusData.error);
+        clearInterval(intervalId)
+        setText("Analysis Failed")
+        console.error("Celery task error:", statusData.error)
       }
-    }, 1500);
+    }, 1500)
   }
 
   return (
