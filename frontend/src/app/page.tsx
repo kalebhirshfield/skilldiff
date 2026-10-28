@@ -50,12 +50,12 @@ export default function Home() {
         : "http://localhost:8000"
     )
 
-    const response = await fetch("${API_URL}/analyse", { method: "POST", body: formData })
+    const response = await fetch(`${API_URL}/analyse`, { method: "POST", body: formData })
     const { task_id } = await response.json()
     setText("Analysing...")
 
     const intervalId = setInterval(async () => {
-      const statusRes = await fetch("${API_URL}/tasks/${task_id}")
+      const statusRes = await fetch(`${API_URL}/tasks/${task_id}`)
       const statusData = await statusRes.json()
 
       if (statusData.status === "SUCCESS") {
