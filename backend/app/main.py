@@ -2,9 +2,7 @@ from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from celery.result import AsyncResult
 from app.utils.parser import extract_text_from_file
-from app.utils.prompt import generate_analysis
-import json
-from app.tasks import analyze_cv_task
+from app.tasks import analyse_cv_task
 from app.celery_app import celery_app
 
 app = FastAPI(title="SkillDiff")
@@ -23,7 +21,7 @@ async def read_files(cv_file: UploadFile, description_file: UploadFile):
     cv_text = await extract_text_from_file(cv_file)
     description_text = await extract_text_from_file(description_file)
 
-    task = analyze_cv_task.delay(cv_text, description_text)
+    task = analyse_cv_task.delay(cv_text, description_text)
 
     return {"task_id": task.id, "status": "PROCESSING"}
 
