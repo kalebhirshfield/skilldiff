@@ -22,7 +22,8 @@ export default function Home() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
 
   async function sendData() {
-    setText("Loading...")
+    setText("Uploading files...")
+    setAnalysisResult(null)
     const cvInput = document.getElementById("CV")
     const descriptionInput = document.getElementById("Description")
 
@@ -32,8 +33,8 @@ export default function Home() {
     }
 
     if (!(descriptionInput instanceof HTMLInputElement) || !descriptionInput.files?.[0]) {
-      setText("Select a CV");
-      return;
+      setText("Select a CV")
+      return
     }
 
     const cvFile = cvInput.files[0];
@@ -44,10 +45,23 @@ export default function Home() {
     formData.append("description_file", descriptionFile)
 
     const response = await fetch("http://localhost:8000/analyse", { method: "POST", body: formData })
-    const data = await response.json();
+    const { task_id } = await response.json()
+    setText("Analysing...")
 
-    setAnalysisResult(data);
-    setText("Analysis Complete");
+    const intervalId = setInterval(async () => {
+      const statusRes = await fetch(`http://localhost:8000/tasks/${task_id}`);
+      const statusData = await statusRes.json();
+
+      if (statusData.status === "SUCCESS") {
+        clearInterval(intervalId);
+        setAnalysisResult(statusData.result);
+        setText("Analysis Complete");
+      } else if (statusData.status === "FAILURE") {
+        clearInterval(intervalId);
+        setText("Analysis Failed");
+        console.error("Celery task error:", statusData.error);
+      }
+    }, 1500);
   }
 
   return (
@@ -95,5 +109,5 @@ export default function Home() {
         </div>
       )}
     </div >
-  );
+  )
 }

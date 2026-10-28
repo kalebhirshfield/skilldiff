@@ -1,4 +1,10 @@
 services:
+  redis:
+    image: redis:alpine
+    container_name: skilldiff-redis
+    ports:
+      - "6379:6379"
+
   backend:
     build: ./backend
     container_name: skilldiff-backend
@@ -6,6 +12,16 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env
+
+  celery_worker:
+    build: ./backend
+    container_name: skilldiff-celery
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - backend
+      - redis
 
   frontend:
     build: ./frontend
