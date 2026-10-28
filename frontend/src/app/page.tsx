@@ -21,12 +21,6 @@ export default function Home() {
   const [text, setText] = useState("Submit")
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null)
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || (
-    process.env.NODE_ENV === "production"
-      ? "https://skilldiff.onrender.com"
-      : "http://localhost:8000"
-  )
-
   async function sendData() {
     setText("Uploading files...")
     setAnalysisResult(null)
@@ -49,6 +43,12 @@ export default function Home() {
     const formData = new FormData()
     formData.append("cv_file", cvFile)
     formData.append("description_file", descriptionFile)
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || (
+      process.env.NODE_ENV === "production"
+        ? "https://skilldiff.onrender.com"
+        : "http://localhost:8000"
+    )
 
     const response = await fetch("${API_URL}/analyse", { method: "POST", body: formData })
     const { task_id } = await response.json()
