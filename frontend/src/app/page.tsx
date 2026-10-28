@@ -44,11 +44,7 @@ export default function Home() {
     formData.append("cv_file", cvFile)
     formData.append("description_file", descriptionFile)
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || (
-      process.env.NODE_ENV === "production"
-        ? "https://skilldiff.onrender.com"
-        : "http://localhost:8000"
-    )
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
     const response = await fetch(`${API_URL}/analyse`, { method: "POST", body: formData })
     const { task_id } = await response.json()
