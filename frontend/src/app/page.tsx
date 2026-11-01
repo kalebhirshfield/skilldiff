@@ -21,6 +21,24 @@ export default function Home() {
   const [text, setText] = useState("Submit")
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null)
 
+  async function fetchWithRetry(url: string, options: RequestInit, retries = 3, delay = 5000): Promise<Response> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 60000)
+
+        const response = await fetch(url, { ...options, signal: controller.signal })
+        clearTimeout(timeoutId)
+
+        if (response.ok) return response
+      } catch (err) {
+        if (i === retries - 1) throw err
+        await new Promise((res) => setTimeout(res, delay))
+      }
+    }
+    throw new Error("Server took too long to wake up.")
+  }
+
   async function sendData() {
     setText("Uploading files...")
     setAnalysisResult(null)
@@ -46,7 +64,7 @@ export default function Home() {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
-    const response = await fetch(`${API_URL}/analyse`, { method: "POST", body: formData })
+    const response = await fetchWithRetry(`${API_URL}/analyse`, { method: "POST", body: formData })
     const { task_id } = await response.json()
     setText("Analysing...")
 
