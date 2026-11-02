@@ -30,61 +30,57 @@ export default function Home() {
   async function sendData() {
     setIsLoading(true)
 
-    try {
-      if (warmupPromise.current) {
-        setText("Waking up server...")
-        await warmupPromise.current
-        warmupPromise.current = null
-      }
+    const cvInput = document.getElementById("CV")
+    const descriptionInput = document.getElementById("Description")
 
-      setText("Uploading files...")
-
-      setAnalysisResult(null)
-      const cvInput = document.getElementById("CV")
-      const descriptionInput = document.getElementById("Description")
-
-      if (!(cvInput instanceof HTMLInputElement) || !cvInput.files?.[0]) {
-        setText("Select a CV")
-        return
-      }
-
-      if (!(descriptionInput instanceof HTMLInputElement) || !descriptionInput.files?.[0]) {
-        setText("Select a CV")
-        return
-      }
-
-      const cvFile = cvInput.files[0]
-      const descriptionFile = descriptionInput.files[0]
-
-      const formData = new FormData()
-      formData.append("cv_file", cvFile)
-      formData.append("description_file", descriptionFile)
-
-      const response = await fetch(`${API_URL}/analyse`, { method: "POST", body: formData })
-      const { task_id } = await response.json()
-      setText("Analysing...")
-
-      const intervalId = setInterval(async () => {
-        const statusRes = await fetch(`${API_URL}/tasks/${task_id}`)
-        const statusData = await statusRes.json()
-
-        if (statusData.status === "SUCCESS") {
-          clearInterval(intervalId)
-          setAnalysisResult(statusData.result)
-          setText("Analysis Complete")
-        } else if (statusData.status === "FAILURE") {
-          clearInterval(intervalId)
-          setText("Analysis Failed")
-          console.error("Celery task error:", statusData.error)
-        }
-      }, 1500)
-    } catch (error) {
-      console.error(error)
-    } finally {
+    if (!(cvInput instanceof HTMLInputElement) || !cvInput.files?.[0]) {
+      setText("Select a CV")
       setIsLoading(false)
-      setText("Analyse")
+      return
     }
 
+    if (!(descriptionInput instanceof HTMLInputElement) || !descriptionInput.files?.[0]) {
+      setText("Select a Description")
+      setIsLoading(false)
+      return
+    }
+
+    if (warmupPromise.current) {
+      setText("Waking up server...")
+      await warmupPromise.current
+      warmupPromise.current = null
+    }
+
+    setText("Uploading files...")
+    setAnalysisResult(null)
+
+    const cvFile = cvInput.files[0]
+    const descriptionFile = descriptionInput.files[0]
+
+    const formData = new FormData()
+    formData.append("cv_file", cvFile)
+    formData.append("description_file", descriptionFile)
+
+    const response = await fetch(`${API_URL}/analyse`, { method: "POST", body: formData })
+    const { task_id } = await response.json()
+    setText("Analysing...")
+
+    const intervalId = setInterval(async () => {
+      const statusRes = await fetch(`${API_URL}/tasks/${task_id}`)
+      const statusData = await statusRes.json()
+
+      if (statusData.status === "SUCCESS") {
+        clearInterval(intervalId)
+        setAnalysisResult(statusData.result)
+        setText("Analysis Complete")
+        setIsLoading(false)
+      } else if (statusData.status === "FAILURE") {
+        clearInterval(intervalId)
+        setText("Analysis Failed")
+        console.error("Celery task error:", statusData.error)
+        setIsLoading(false)
+      }
+    }, 1500)
   }
 
   return (
