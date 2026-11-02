@@ -4,6 +4,7 @@ from fastapi import UploadFile
 
 
 async def extract_text_from_file(file: UploadFile) -> str:
+    await file.seek(0)
     contents = await file.read()
     filename = file.filename.lower()
 
