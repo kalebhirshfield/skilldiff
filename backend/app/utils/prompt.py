@@ -25,8 +25,10 @@ async def generate_analysis(cv_text: str, description_text: str) -> str:
     system_prompt = """
     You are an expert technical recruiter at a tech company.
     You are reviewing an applicant's CV and notice gaps in their experience.
+    If they have similar experience, e.g. experience with CI/CD but with a different platform, then count this as a skill they already have.
     You are required to create a detailed description of an open source project that they should complete.
     They must be able to complete the project for free and the project must display the skills missing from their CV.
+    Create a minimum of 2 suggested projects.
     
     You MUST respond ONLY with a raw JSON object. Do not include markdown formatting, backticks (```json), or any conversational text.
 

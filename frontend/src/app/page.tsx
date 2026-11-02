@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useRef, useState } from "react"
+import { Separator } from "@/components/ui/separator"
 
 interface ProjectRecommendation {
   title: string
@@ -85,32 +86,42 @@ export default function Home() {
 
   return (
     <div>
-      <div className="pb-5">
-        {FileUpload("CV", "Select a pdf to upload.")}
+      <div className="flex justify-center">
+        <h1 className="text-xl font-bold p-5 tracking-tight">SKILLDIFF</h1>
       </div>
-      <div className="pb-5">
-        {FileUpload("Description", "Select a pdf to upload")}
-      </div>
-      <Button variant="outline" onClick={sendData} disabled={isLoading}>{text}</Button>
-      {analysisResult && (
-        <div className="mt-8 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Identified Skill Gaps</CardTitle>
-              <CardDescription>Skills found in the job description missing from your CV</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {analysisResult.missing_skills.map((skill, index) => (
-                  <Badge key={index} variant="secondary">
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold tracking-tight">Recommended Portfolio Projects</h2>
+      <Separator />
+      <div className="p-10 space-y-5">
+        <Card>
+          <CardContent className="space-y-5">
+            <div>
+              {FileUpload("CV", "Select a pdf/txt to upload.")}
+            </div>
+            <div>
+              {FileUpload("Description", "Select a pdf/txt to upload")}
+            </div>
+          </CardContent>
+        </Card>
+        <div className="flex justify-center">
+          <Button className="w-full" variant="outline" onClick={sendData} disabled={isLoading}>{text}</Button>
+        </div>
+        {analysisResult && (
+          <div className="space-y-5">
+            <Card>
+              <CardHeader>
+                <CardTitle>Identified Skill Gaps</CardTitle>
+                <CardDescription>Skills found in the job description missing from your CV</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {analysisResult.missing_skills.map((skill, index) => (
+                    <Badge key={index} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <h2 className="text-xl font-semibold">Recommended Portfolio Projects</h2>
             {analysisResult.project_recommendations.map((project, index) => (
               <Card key={index}>
                 <CardHeader>
@@ -125,8 +136,8 @@ export default function Home() {
               </Card>
             ))}
           </div>
-        </div>
-      )}
-    </div >
+        )}
+      </div>
+    </div>
   )
 }
