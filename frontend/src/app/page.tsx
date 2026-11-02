@@ -4,7 +4,7 @@ import FileUpload from "@/components/file-upload"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 interface ProjectRecommendation {
   title: string
@@ -18,70 +18,73 @@ interface AnalysisResponse {
 }
 
 export default function Home() {
-  const [text, setText] = useState("Submit")
+  const [text, setText] = useState("Analyse")
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const warmupPromise = useRef<Promise<any> | null>(null)
 
-  async function fetchWithRetry(url: string, options: RequestInit, retries = 3, delay = 5000): Promise<Response> {
-    for (let i = 0; i < retries; i++) {
-      try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 60000)
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://skilldiff.onrender.com"
 
-        const response = await fetch(url, { ...options, signal: controller.signal })
-        clearTimeout(timeoutId)
-
-        if (response.ok) return response
-      } catch (err) {
-        if (i === retries - 1) throw err
-        await new Promise((res) => setTimeout(res, delay))
-      }
-    }
-    throw new Error("Server took too long to wake up.")
-  }
+  useEffect(() => { warmupPromise.current = fetch(`${API_URL}/`).catch(() => console.log("Server waking up...")) }, [])
 
   async function sendData() {
-    setText("Uploading files...")
-    setAnalysisResult(null)
-    const cvInput = document.getElementById("CV")
-    const descriptionInput = document.getElementById("Description")
+    setIsLoading(true)
 
-    if (!(cvInput instanceof HTMLInputElement) || !cvInput.files?.[0]) {
-      setText("Select a CV")
-      return
-    }
-
-    if (!(descriptionInput instanceof HTMLInputElement) || !descriptionInput.files?.[0]) {
-      setText("Select a CV")
-      return
-    }
-
-    const cvFile = cvInput.files[0]
-    const descriptionFile = descriptionInput.files[0]
-
-    const formData = new FormData()
-    formData.append("cv_file", cvFile)
-    formData.append("description_file", descriptionFile)
-
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
-
-    const response = await fetchWithRetry(`${API_URL}/analyse`, { method: "POST", body: formData })
-    const { task_id } = await response.json()
-    setText("Analysing...")
-
-    const intervalId = setInterval(async () => {
-      const statusRes = await fetch(`${API_URL}/tasks/${task_id}`)
-      const statusData = await statusRes.json()
-
-      if (statusData.status === "SUCCESS") {
-        clearInterval(intervalId)
-        setAnalysisResult(statusData.result)
-        setText("Analysis Complete")
-      } else if (statusData.status === "FAILURE") {
-        clearInterval(intervalId)
-        setText("Analysis Failed")
-        console.error("Celery task error:", statusData.error)
+    try {
+      if (warmupPromise.current) {
+        setText("Waking up server...")
+        await warmupPromise.current
+        warmupPromise.current = null
       }
-    }, 1500)
+
+      setText("Uploading files...")
+
+      setAnalysisResult(null)
+      const cvInput = document.getElementById("CV")
+      const descriptionInput = document.getElementById("Description")
+
+      if (!(cvInput instanceof HTMLInputElement) || !cvInput.files?.[0]) {
+        setText("Select a CV")
+        return
+      }
+
+      if (!(descriptionInput instanceof HTMLInputElement) || !descriptionInput.files?.[0]) {
+        setText("Select a CV")
+        return
+      }
+
+      const cvFile = cvInput.files[0]
+      const descriptionFile = descriptionInput.files[0]
+
+      const formData = new FormData()
+      formData.append("cv_file", cvFile)
+      formData.append("description_file", descriptionFile)
+
+      const response = await fetch(`${API_URL}/analyse`, { method: "POST", body: formData })
+      const { task_id } = await response.json()
+      setText("Analysing...")
+
+      const intervalId = setInterval(async () => {
+        const statusRes = await fetch(`${API_URL}/tasks/${task_id}`)
+        const statusData = await statusRes.json()
+
+        if (statusData.status === "SUCCESS") {
+          clearInterval(intervalId)
+          setAnalysisResult(statusData.result)
+          setText("Analysis Complete")
+        } else if (statusData.status === "FAILURE") {
+          clearInterval(intervalId)
+          setText("Analysis Failed")
+          console.error("Celery task error:", statusData.error)
+        }
+      }, 1500)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+      setText("Analyse")
+    }
+
   }
 
   return (
@@ -92,7 +95,7 @@ export default function Home() {
       <div className="pb-5">
         {FileUpload("Description", "Select a pdf to upload")}
       </div>
-      <Button variant="outline" onClick={sendData}>{text}</Button>
+      <Button variant="outline" onClick={sendData} disabled={isLoading}>{text}</Button>
       {analysisResult && (
         <div className="mt-8 space-y-6">
           <Card>
