@@ -87,7 +87,7 @@ export default function Home() {
   return (
     <div>
       <div className="flex justify-center">
-        <h1 className="text-xl font-bold p-5 tracking-tight">SKILLDIFF</h1>
+        <h1 className="text-3xl font-bold p-5 tracking-tight">SKILLDIFF</h1>
       </div>
       <Separator />
       <div className="p-10 space-y-5">
@@ -114,9 +114,7 @@ export default function Home() {
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {analysisResult.missing_skills.map((skill, index) => (
-                    <Badge key={index} variant="secondary">
-                      {skill}
-                    </Badge>
+                    <Badge key={index} variant="secondary">{skill}</Badge>
                   ))}
                 </div>
               </CardContent>
@@ -129,9 +127,7 @@ export default function Home() {
                     <CardTitle className="text-lg">{project.title}</CardTitle>
                     <Badge variant="outline">{project.difficulty}</Badge>
                   </div>
-                  <CardDescription className="pt-2 text-sm leading-relaxed text-muted-foreground">
-                    {project.description}
-                  </CardDescription>
+                  <CardDescription>{project.description}</CardDescription>
                 </CardHeader>
               </Card>
             ))}
