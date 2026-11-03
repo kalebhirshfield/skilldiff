@@ -2,7 +2,7 @@
 
 import FileUpload from "@/components/file-upload"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useRef, useState } from "react"
 import { Separator } from "@/components/ui/separator"
@@ -11,10 +11,10 @@ interface ProjectRecommendation {
   title: string
   description: string
   difficulty: string
+  missing_skills: string[]
 }
 
 interface AnalysisResponse {
-  missing_skills: string[]
   project_recommendations: ProjectRecommendation[]
 }
 
@@ -106,19 +106,6 @@ export default function Home() {
         </div>
         {analysisResult && (
           <div className="space-y-5">
-            <Card>
-              <CardHeader>
-                <CardTitle>Identified Skill Gaps</CardTitle>
-                <CardDescription>Skills found in the job description missing from your CV</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {analysisResult.missing_skills.map((skill, index) => (
-                    <Badge key={index} variant="secondary">{skill}</Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
             <h2 className="text-xl font-semibold">Recommended Portfolio Projects</h2>
             {analysisResult.project_recommendations.map((project, index) => (
               <Card key={index}>
@@ -129,6 +116,13 @@ export default function Home() {
                   </div>
                   <CardDescription className="text-sm text-card-foreground">{project.description}</CardDescription>
                 </CardHeader>
+                <CardFooter>
+                  <div className="flex flex-wrap gap-2">
+                    {project.missing_skills.map((skill, index) => (
+                      <Badge key={index} variant="secondary">{skill}</Badge>
+                    ))}
+                  </div>
+                </CardFooter>
               </Card>
             ))}
           </div>
