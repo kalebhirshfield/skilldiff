@@ -41,12 +41,12 @@ async def generate_analysis(cv_text: str, description_text: str) -> str:
 
     The JSON object must strictly follow this schema:
     {
-        "missing_skills": ["Array of genuinely missing skills only, excluding transferable ones"],
         "project_recommendations": [
             {
                 "title": "A catchy, techy, sci-fi, or hacker-style project codename (e.g., 'Project Nebula', 'CacheNova')",
                 "description": "State the concrete, real-world app they are building, followed by a detailed explanation of how building it uses the missing skills. Do NOT use generic enterprise jargon.",
-                "difficulty": "Beginner | Intermediate | Advanced"
+                "difficulty": "Beginner | Intermediate | Advanced",
+                "missing_skills": ["Array of genuinely missing skills only, excluding transferable ones, covered by the project"]
             }
         ]
     }
