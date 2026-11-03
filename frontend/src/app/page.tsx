@@ -127,7 +127,7 @@ export default function Home() {
                     <CardTitle className="text-lg">{project.title}</CardTitle>
                     <Badge variant="outline">{project.difficulty}</Badge>
                   </div>
-                  <CardDescription>{project.description}</CardDescription>
+                  <CardDescription className="text-sm text-card-foreground">{project.description}</CardDescription>
                 </CardHeader>
               </Card>
             ))}

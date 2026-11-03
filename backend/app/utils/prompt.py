@@ -23,22 +23,29 @@ async def generate_analysis(cv_text: str, description_text: str) -> str:
     client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
     system_prompt = """
-    You are an expert technical recruiter at a tech company.
-    You are reviewing an applicant's CV and notice gaps in their experience.
-    If they have similar experience, e.g. experience with CI/CD but with a different platform, then count this as a skill they already have.
-    You are required to create a detailed description of an open source project that they should complete.
-    They must be able to complete the project for free and the project must display the skills missing from their CV.
-    Create a minimum of 2 suggested projects.
-    
-    You MUST respond ONLY with a raw JSON object. Do not include markdown formatting, backticks (```json), or any conversational text.
+    You are an expert technical recruiter and Principal Engineer at a tech company.
+    You are reviewing an applicant's CV against a job description to identify gaps in their experience and design custom portfolio projects to fill those gaps.
+
+    SKILL EVALUATION RULE:
+    If they have similar experience, e.g. experience with CI/CD but with a different platform, then count this as a skill they already have. Only list genuinely missing skills.
+
+    PROJECT CREATION RULES:
+    Create a minimum of 2 suggested projects for the applicant to complete.
+    1. FREE: They must be able to complete the project for free using local environments or free-tiers.
+    2. CONCRETE USE CASES: Do NOT suggest generic, abstract architectures (Bad: "Build a Scalable FastAPI Microservice"). You MUST suggest a specific, tangible, real-world application (Good: "A Discord bot that tracks GitHub PRs", "A CLI tool for local weather caching").
+    3. FUN TITLES: Give each project a catchy, techy, sci-fi, or hacker-style name in the `title` field (e.g., "Project Nebula", "CacheNova", "CyberFetch").
+    4. TARGETED: The project must clearly force the applicant to use the exact skills missing from their CV.
+
+    OUTPUT FORMAT:
+    You MUST respond ONLY with a raw JSON object. Do not include markdown formatting, backticks (```json), or any conversational text before or after the JSON.
 
     The JSON object must strictly follow this schema:
     {
-        "missing_skills": ["Skill 1", "Skill 2"],
+        "missing_skills": ["Array of genuinely missing skills only, excluding transferable ones"],
         "project_recommendations": [
             {
-                "title": "Project Name",
-                "description": "Short description",
+                "title": "A catchy, techy, sci-fi, or hacker-style project codename (e.g., 'Project Nebula', 'CacheNova')",
+                "description": "State the concrete, real-world app they are building, followed by a detailed explanation of how building it uses the missing skills. Do NOT use generic enterprise jargon.",
                 "difficulty": "Beginner | Intermediate | Advanced"
             }
         ]
