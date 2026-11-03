@@ -12,10 +12,10 @@ class ProjectRecommendation(BaseModel):
     title: str
     description: str
     difficulty: str
+    missing_skills: List[str]
 
 
 class GapAnalysisResponse(BaseModel):
-    missing_skills: List[str]
     project_recommendations: List[ProjectRecommendation]
 
 
